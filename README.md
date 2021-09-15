@@ -1,17 +1,14 @@
-# Susu
-### A Collective Savings Application
+# Susu: Collective Savings Application
 
 ### Description
-A susu is a method of group saving that has been used across Africa and the Caribbean.  This type of savings structure is a benefit to all involved if everything works out well, but can be the cause of conflict if any of the participants does not follow the rules.
-
-In a susu, each participant contributes a set amount of money for  
+This is a savings application where a small group of people periodically contribute money into a collective pot.  A person is then randomly selected to recieve the money.  In the subsequent contribution period, a new person is randomly selected to recieve the money collected during that period.  This continues until all participants have recieved a payout.  
 
 ### Workflow
-- User creates a collective
-- Creator selects number of users that can join the collective
-- Creator decides pot amount and payout schedule
+- User creates a new group savings account known as a susu. 
+- Creator selects number of users that can join the susu
 - User invites others to collective
-- Collective is locked once enough users join the collective
+- Creator decides pot amount and payout schedule
+- Collective is locked once enough users join the susu
 - Each user approves sending money into the account
 - When all users have signed the request the first hand gets paid out randomly
 - When the next payout schedule starts, the next recipient is randomly selected
