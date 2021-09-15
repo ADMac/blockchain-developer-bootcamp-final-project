@@ -1,8 +1,9 @@
 # Susu
-## A Collective Savings Application
+### A Collective Savings Application
 
 ### Description
-A susu is a method of group saving that has been used across Africa and the Caribbean.  This type of savings structure is a benefit to all involved if everything works out well, but can be the cause of conflict if any of the participants does not follow the rules.\n\n
+A susu is a method of group saving that has been used across Africa and the Caribbean.  This type of savings structure is a benefit to all involved if everything works out well, but can be the cause of conflict if any of the participants does not follow the rules.
+
 In a susu, each participant contributes a set amount of money for  
 
 ### Workflow
