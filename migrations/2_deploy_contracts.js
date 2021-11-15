@@ -1,5 +1,5 @@
-var SavingsPool = artifacts.require("./SavingsPool.sol");
+var InvestmentPool = artifacts.require("./InvestmentPool.sol");
 
 module.exports = function(deployer) {
-  deployer.deploy(SavingsPool);
+  deployer.deploy(InvestmentPool);
 };
