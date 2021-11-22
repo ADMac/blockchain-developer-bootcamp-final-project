@@ -1,0 +1,26 @@
+{
+  "name": "blockchain-developer-bootcamp-final-project",
+  "version": "1.0.0",
+  "description": "### Description This is a savings application where a small group of people periodically contribute money into a collective pot.  A person is then randomly selected to recieve the money.  In the subsequent contribution period, a new person is randomly selected to recieve the money collected during that period.  This continues until all participants have recieved a payout.",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ADMac/blockchain-developer-bootcamp-final-project.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ADMac/blockchain-developer-bootcamp-final-project/issues"
+  },
+  "homepage": "https://github.com/ADMac/blockchain-developer-bootcamp-final-project#readme",
+  "devDependencies": {
+    "@openzeppelin/contracts": "^4.3.3"
+  }
+}
