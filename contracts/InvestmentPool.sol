@@ -15,7 +15,6 @@ contract InvestmentPool {
     uint256 depositAmount;
     uint256 depositTotal;
     address[] members;
-    mapping(address => uint256) userDeposits;
     bool isActive;
     uint256 round;
   }
@@ -23,15 +22,22 @@ contract InvestmentPool {
   /* VARIABLES */
 
   address public owner = msg.sender;
-  mapping(uint => Pool) poolsById;
+  mapping(uint256 => Pool) public poolsById;
   Pool[] pools;
   mapping(address => Pool[]) public userPools;
+  mapping(uint256 => mapping(address => bool)) userDeposits;
 
   /* EVENTS */
 
-  event poolCreated(uint id);
+  event poolCreated(uint256 id);
+  event depositMade(address depositor, uint256 amount);
 
   /* MODIFIERS */
+
+  modifier userCanDeposit(uint256 _poolId) {
+      require(userDeposits[_poolId][msg.sender] == true, "You cannot add deposits to this pool");
+      _;
+  }
 
   constructor() {
     owner = msg.sender;
@@ -39,15 +45,15 @@ contract InvestmentPool {
 
   /* FUNCTIONS */
 
-  function createPool(address[] memory _poolMembers, uint256 _depositAmount) public returns(uint256) {
-    Pool storage pool;
-    pool.members = _poolMembers;
-    pool.depositAmount = _depositAmount;
-    pool.isActive = true; 
-    userPools[msg.sender].push(pool);
+  function createPool(address[] memory _poolMembers, uint256 _depositAmount, string memory _name) public returns(uint256) {
+    Pool memory pool = Pool(pools.length, _name, _depositAmount, 0, _poolMembers, true, 0); 
     pools.push(pool);
-    pool.poolId = pools.length;
+    userPools[msg.sender].push(pool);
     poolsById[pool.poolId] = pool;
+    //pool.members = _poolMembers;
+    //pool.depositAmount = _depositAmount;
+    //pool.isActive = true;
+    //pool.poolId = pools.length;
 
     emit poolCreated(pool.poolId);
     return pool.poolId;
@@ -56,6 +62,10 @@ contract InvestmentPool {
   function getPoolMembers(uint256 _poolId) public view returns(address[] memory) {
     address[] memory _poolMembers = poolsById[_poolId].members;
     return _poolMembers;
+  }
+
+  function getDepositTotal(uint256 _poolId) public view returns(uint256 _total) {
+    return poolsById[_poolId].depositTotal;
   }
 
   // return the amount of funds in the pool
@@ -68,15 +78,22 @@ contract InvestmentPool {
     return currentPools;
   }
 
-  function depositFunds(uint256 _poolId) external payable {
-    if(msg.value == 1 ether) {
+  function depositFunds(uint256 _poolId) external payable userCanDeposit(_poolId){
+    // ensure that deposit amount matches pool deposit amount
+    //if(msg.value == pools[_poolId].depositAmount ** 18 wei) {
+    if(msg.value == 10 ** 18 wei) {
       revert();
     }
-    poolsById[poolsById].userDeposits[msg.sender] += msg.value;
+
+    // add new funds to pool amount
+    pools[_poolId].depositTotal += msg.value;
+
+    // set userCanDeposit to false for the user/pool combo
+    userDeposits[_poolId][msg.sender] = false;
   }
 
-  //function depositFunds(address _depositor) external canDeposit(_depositor) {}
-  // pay out only to pool members
+  // only pay pool member once
+  //function withdrawFunds(address _depositor) external canWithdraw(_depositor){}
 
   // only pay pool member once
   //function makePayout(address _depositor) external canWithdraw(_depositor){}

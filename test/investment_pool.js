@@ -25,16 +25,15 @@ contract("InvestmentPool", function (accounts) {
     it("pool should be created", async () => {
 
       // create pool
-      const poolId = await phInstance.createPool(accounts, 2);
+      const poolId = await phInstance.createPool(accounts, 1 ,"NewPool", {from: accounts[0]});
       
       // get pools where user is a member
       const newPool = await phInstance.getUserPools(accounts[0]);
+
+      // check for correct values
       assert.equal(newPool.length, 1, `user should only be in one pool`);
-      assert.equal(newPool[0].depositAmount, 2, `pool amount should be set to 2`);
-      
-      // get users in pool
-      const poolMembers = await phInstance.getPoolMembers.call("1");
-      assert.equal(poolMembers.length, 10);
+      assert.equal(newPool[0].depositAmount, 1, `pool amount should be set to 1`);
+      assert.equal(newPool[0].members.length, 10, `pool members should be set to 10`);
     })
   });
 
@@ -42,28 +41,28 @@ contract("InvestmentPool", function (accounts) {
     it("pool should accept deposits", async () => {
 
       // create pool
-      const createPool = await phInstance.createPool(accounts, 2);
+      const poolId = await phInstance.createPool(accounts, 1 ,"myTestPool", {from: accounts[0]});
+
+      // get pools where user is a member
+      const newPool = await phInstance.getUserPools(accounts[0]);
 
       // attempt to deposit funds in pool
       try {
-        await phInstance.depositFunds.call(2, { from: accounts[0] });
-      } catch (error) {
-        assert.equal(phInstance.depositTotal, 2, `pool should have 2 eth deposited`);
-      }
+        await phInstance.depositFunds.call("1", { from: accounts[0], value: 1 });
+        assert.equal(newPool[0].depositTotal, 1, `pool should have 2 eth deposited`);
+      } catch (error) {}
     })
-
+/*
     it("pool should not accept deposits less than deposit amount", async () => {
 
       // create pool
-      const createPool = await phInstance.createPool(accounts, 2);
+      const poolId = await phInstance.createPool(accounts, 2 ,"lessThan", {from: accounts[0]});
 
       // attempt to deposit funds in pool
       try {
-        await phInstance.depositFunds.call(1, { from: accounts[0] });
-      } catch (error) {
-        assert.throws(error);
-      }
-    })
+        await phInstance.depositFunds.call("1", { from: accounts[0], value: 1 });
+      } catch (error) { }
+    }) */
 /*
     it("pool should not accept deposits from non members", async () => {
       // get deployed contract
@@ -103,30 +102,40 @@ contract("InvestmentPool", function (accounts) {
       const createPool = await phInstance.createPool(accounts, 2, { from: accounts[0] });
     })
   });
-  
+  */
   describe("Withdraw pool funds", () => {
     it("funds should be withdrawn to member", async () => {
-      // get deployed contract
-      const phInstance = await InvestmentPool.deployed();
 
       // create pool
-      const createPool = await phInstance.createPool(accounts, 2, { from: accounts[0] });
+      const poolId = await phInstance.createPool(accounts, 1 ,"myTestPool", {from: accounts[0]});
+
+      // get pools where user is a member
+      const newPool = await phInstance.getUserPools(accounts[0]);
+
+      // attempt to deposit funds in pool
+      await phInstance.withdrawFunds.call("1", { from: accounts[1], value: 10 });
+      let expectedBalance = web3.toBigNumber(web3.toWei(3, 'ether'));
+      let actualBalance = await web3.eth.getBalance(accounts[1]);
+
+      assert.deepEqual(actualBalance, expectedBalance, "Balance incorrect!");
     })
 
     it("funds should not be withdrawn to non member", async () => {
       // get deployed contract
-      const phInstance = await InvestmentPool.deployed();
+      const phInstance = await InvestmentPool.new();
 
       // create pool
       const createPool = await phInstance.createPool(accounts, 2, { from: accounts[0] });
+      assert.equal(false);
     })
 
     it("funds withdrawn should not be more than total amount", async () => {
       // get deployed contract
-      const phInstance = await InvestmentPool.deployed();
+      const phInstance = await InvestmentPool.new();
 
       // create pool
       const createPool = await phInstance.createPool(accounts, 2, { from: accounts[0] });
+      assert.equal(false);
     })
-  });*/
+  });
 });
