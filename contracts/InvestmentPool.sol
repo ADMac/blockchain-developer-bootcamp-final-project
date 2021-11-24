@@ -25,7 +25,7 @@ contract InvestmentPool {
   mapping(uint256 => Pool) public poolsById;
   Pool[] pools;
   mapping(address => Pool[]) public userPools;
-  mapping(uint256 => mapping(address => bool)) userDeposits;
+  mapping(uint256 => mapping(address => bool)) userDepositTracker;
 
   /* EVENTS */
 
@@ -34,8 +34,13 @@ contract InvestmentPool {
 
   /* MODIFIERS */
 
-  modifier userCanDeposit(uint256 _poolId) {
-      require(userDeposits[_poolId][msg.sender] == true, "You cannot add deposits to this pool");
+  modifier canDeposit(uint256 _poolId) {
+      require(userDepositTracker[_poolId][msg.sender] == true, "You cannot add deposits to this pool");
+      _;
+  }
+
+  modifier canWithdraw(uint256 _poolId) {
+      require(userDepositTracker[_poolId][msg.sender] == false, "You cannot withdraw funds from this pool");
       _;
   }
 
@@ -78,7 +83,7 @@ contract InvestmentPool {
     return currentPools;
   }
 
-  function depositFunds(uint256 _poolId) external payable userCanDeposit(_poolId){
+  function depositFunds(uint256 _poolId) external payable canDeposit(_poolId){
     // ensure that deposit amount matches pool deposit amount
     //if(msg.value == pools[_poolId].depositAmount ** 18 wei) {
     if(msg.value == 10 ** 18 wei) {
@@ -88,12 +93,12 @@ contract InvestmentPool {
     // add new funds to pool amount
     pools[_poolId].depositTotal += msg.value;
 
-    // set userCanDeposit to false for the user/pool combo
-    userDeposits[_poolId][msg.sender] = false;
+    // set canDeposit to false for the user/pool combo
+    userDepositTracker[_poolId][msg.sender] = false;
   }
 
   // only pay pool member once
-  //function withdrawFunds(address _depositor) external canWithdraw(_depositor){}
+  function withdrawFunds(uint256 _poolId) external canWithdraw(_poolId){}
 
   // only pay pool member once
   //function makePayout(address _depositor) external canWithdraw(_depositor){}
