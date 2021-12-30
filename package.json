@@ -21,6 +21,8 @@
   },
   "homepage": "https://github.com/ADMac/blockchain-developer-bootcamp-final-project#readme",
   "devDependencies": {
-    "@openzeppelin/contracts": "^4.3.3"
+    "@openzeppelin/contracts": "^4.3.3",
+    "@openzeppelin/test-helpers": "^0.5.15",
+    "chai": "^4.3.4"
   }
 }
