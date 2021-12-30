@@ -2,107 +2,104 @@
 pragma solidity ^0.8.2;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
-contract Tickets is ERC721, Ownable {
-    using SafeMath for uint256;
+contract Tickets is ERC721, ERC721Enumerable, Pausable, Ownable, ERC721Burnable {
+    using Counters for Counters.Counter;
 
-    uint256 public startingIndexBlock;
+    using SafeMath for uint;
 
-    uint256 public startingIndex;
+    /* VARIABLES */
 
-    uint256 public constant ticketPrice = 10000000000000000; //0.01 ETH
-
-    uint public constant maxTicketPurchase = 20;
+    Counters.Counter private _tokenIdCounter;
 
     uint256 public MAX_TICKETS;
 
-    bool public saleIsActive = false;
+    uint public constant maxTicketPurchase = 20;
 
-    uint256 public REVEAL_TIMESTAMP;
+    uint256 public constant ticketPrice = 10000000000000000; //0.08 ETH
 
-    constructor() ERC721("Tickets", "TCKT") {}
+    /* EVENTS */
 
-    function safeMint(address to, uint256 tokenId) public onlyOwner {
-        _safeMint(to, tokenId);
+    event ticketBought();
+
+    event ticketTransfered();
+
+    /* CONSTRUCTOR */
+
+    constructor(uint256 maxNftSupply) ERC721("Tickets", "TCKT") {
+      MAX_TICKETS = maxNftSupply;
     }
 
-    constructor(string memory name, string memory symbol, uint256 maxTicketSupply, uint256 saleStart) ERC721(name, symbol) {
-        MAX_TICKETS = maxTicketSupply;
-        REVEAL_TIMESTAMP = saleStart + (86400 * 9);
+    /* FUNCTIONS */
+
+    function pause() public onlyOwner {
+        _pause();
     }
 
-    function withdraw() public onlyOwner {
-        uint balance = address(this).balance;
-        msg.sender.transfer(balance);
+    function unpause() public onlyOwner {
+        _unpause();
+    }
+
+    function totalSupply() public view override returns (uint256) {
+      return MAX_TICKETS;
     }
 
     /**
-     * Reserve some tickets for giveaways
+     * Set some tickets aside
      */
-    function reserveTickets() public onlyOwner {        
+    function reserveTickets(uint256 reserves) public onlyOwner {   
+        // require reserves !< supply     
         uint supply = totalSupply();
         uint i;
-        for (i = 0; i < 30; i++) {
+        for (i = 0; i < reserves; i++) {
             _safeMint(msg.sender, supply + i);
         }
     }
 
-    /*
-    * Pause sale if active, make active if paused
-    */
-    function flipSaleState() public onlyOwner {
-        saleIsActive = !saleIsActive;
+    function withdraw() public onlyOwner {
+        uint balance = address(this).balance;
+        payable(msg.sender).transfer(balance);
     }
 
     /**
-    * Mints Bored Apes
+    * Mints Tickets
     */
-    function mintTickets(uint numberOfTickets) public payable {
-        require(saleIsActive, "Sale must be active to mint Ape");
-        require(numberOfTickets <= maxTicketPurchase, "Can only buy 20 tickets at a time");
-        require(totalSupply().add(numberOfTickets) <= MAX_APES, "Purchase would exceed max supply of tickets");
-        require(apePrice.mul(numberOfTickets) <= msg.value, "Ether value sent is not correct");
+    function buyTickets(uint numberOfTokens) public payable {
+        require(paused(), "Sale must be active to mint ticket");
+        require(numberOfTokens <= maxTicketPurchase, "Can only mint 20 tokens at a time");
+        require(totalSupply().add(numberOfTokens) <= MAX_TICKETS, "Purchase would exceed max supply of tickets");
+        require(ticketPrice.mul(numberOfTokens) <= msg.value, "Ether value sent is not correct");
         
-        for(uint i = 0; i < maxTicketPurchase; i++) {
+        for(uint i = 0; i < numberOfTokens; i++) {
             uint mintIndex = totalSupply();
-            if (totalSupply() < TICKET_APES) {
+            if (totalSupply() < MAX_TICKETS) {
                 _safeMint(msg.sender, mintIndex);
             }
         }
-
-        // If we haven't set the starting index and this is either 1) the last saleable token or 2) the first token to be sold after
-        // the end of pre-sale, set the starting index block
-        if (startingIndexBlock == 0 && (totalSupply() == TICKET_APES || block.timestamp >= REVEAL_TIMESTAMP)) {
-            startingIndexBlock = block.number;
-        } 
     }
 
-    /**
-     * Set the starting index for the collection
-     */
-    function setStartingIndex() public {
-        require(startingIndex == 0, "Starting index is already set");
-        require(startingIndexBlock != 0, "Starting index block must be set");
-        
-        startingIndex = uint(blockhash(startingIndexBlock)) % MAX_APES;
-        // Just a sanity case in the worst case if this function is called late (EVM only stores last 256 block hashes)
-        if (block.number.sub(startingIndexBlock) > 255) {
-            startingIndex = uint(blockhash(block.number - 1)) % MAX_APES;
-        }
-        // Prevent default sequence
-        if (startingIndex == 0) {
-            startingIndex = startingIndex.add(1);
-        }
+    function _beforeTokenTransfer(address from, address to, uint256 tokenId)
+        internal
+        whenNotPaused
+        override(ERC721, ERC721Enumerable)
+    {
+        super._beforeTokenTransfer(from, to, tokenId);
     }
 
-    /**
-     * Set the starting index block for the collection, essentially unblocking
-     * setting starting index
-     */
-    function emergencySetStartingIndexBlock() public onlyOwner {
-        require(startingIndex == 0, "Starting index is already set");
-        
-        startingIndexBlock = block.number;
+    // The following functions are overrides required by Solidity.
+
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        override(ERC721, ERC721Enumerable)
+        returns (bool)
+    {
+        return super.supportsInterface(interfaceId);
     }
 }
