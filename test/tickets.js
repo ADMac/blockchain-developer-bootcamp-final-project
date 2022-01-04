@@ -12,74 +12,92 @@ contract('Tickets', function ([sender, receiver]) {
     // The bundled BN library is the same one web3 uses under the hood
     this.value = new BN(1);
 
-    this.tickets = await Tickets.new(10000);
+    this.tickets = await Tickets.new(1000);
+  });
+
+  // check ticket supply
+  it('no tickets have been sold', async function () {
+    const supply = await this.tickets.totalSupply({ from: sender });
+
+    assert.equal(supply, 0, 'ticket supply is incorrect');
   });
 
   // mint new tickets
-  it('new tickets will be minted', async function () {
-    const stuff = await this.tickets.buyTickets(this.value, { from: sender });
-    // assert allowed
+  it('new tickets will be bought', async function () {
+    const stuff = await this.tickets.buyTickets(4, { from: receiver, value: web3.utils.toWei('1', 'ether') });
+
+    // assert owner has 4 tickets
+    expect(await this.tickets.balanceOf(receiver))
+      .to.be.bignumber.equal(4);
   });
 
   // mint max amount of tickets
-  it('cannot mint more than max amount of tickets', async function () {
-    const stuff = await this.tickets.buyTickets(21, this.value, { from: sender });
-    // assert failure
+  it('cannot buy more than max amount of tickets', async function () {
+    await expectRevert(
+      this.tickets.buyTickets(21, { from: receiver }),
+      'buyTickets: Can only buy 4 tokens at a time',
+    );
   });
 
   // reserve tickets
   it('tickets can be reserved', async function () {
-    const stuff = await this.tickets.reserveTickets(9999, { from: sender });
+    await this.tickets.reserveTickets(10, { from: sender });
 
-    // assert failure
-    const stuff1 = await this.tickets.mintTickets(21, this.value, { from: sender });
+    const tokenBalance = await this.tickets.balanceOf(sender)
+    const tokenCount = new BN(10);
+
+    // assert owner has 10 tickets
+    assert.equal(tokenCount.toString(), tokenBalance.toString());
+  });
+
+  // reserve more than max tickets
+  it('no more that 20 tickets reserved', async function () {
+    await expectRevert(
+      this.tickets.reserveTickets(21, { from: sender }),
+      'reserveTickets: Tried to reserve more the 20 tickets',
+    );
   });
 
   // buy tickets below price
   it('cannot buy tickets under price', async function () {
-    // assert failure
-    const stuff = await this.tickets.mintTickets(this.value, { from: sender });
+    await expectRevert(
+      this.tickets.buyTickets(4, { from: receiver, value: 1 }),
+      'buyTickets: Ether value sent is not correct',
+    );
   });
 
   // pause minting
-  it('pause minting of tickets', async function () {
-    const stuff = await this.tickets.pause({ from: sender });
+  it('pause buying of tickets', async function () {
+    const pause = await this.tickets.pause({ from: sender });
+
+    expectEvent(pause, 'Paused', {
+      account: sender,
+    });
 
     // assert failure
-    const stuff1 = await this.tickets.mintTickets(this.value, { from: sender });
+    await expectRevert(
+      this.tickets.buyTickets(4, { from: receiver }),
+      'buyTickets: Sale must be active to buy ticket',
+    );
   });
 
   // unpause minting
-  it('unpause minting of tickets', async function () {
-    const stuff = await this.tickets.unpause({ from: sender });
+  it('unpause buying of tickets', async function () {
+    const pause = await this.tickets.pause({ from: sender });
+
+    const unpause = await this.tickets.unpause({ from: sender });
+
+    // verify unpause
+    expectEvent(unpause, 'Unpaused', {
+      account: sender,
+    });
 
     // assert passing
-    const stuff1 = await this.tickets.mintTickets(this.value, { from: sender });
+    const stuff1 = await this.tickets.buyTickets(3, { from: receiver, value: web3.utils.toWei('1', 'ether') });
   });
 
   // mint tickets while paused
 /*
-  it('reverts when transferring tokens to the zero address', async function () {
-    // Conditions that trigger a require statement can be precisely tested
-    await expectRevert(
-      this.tickets.transfer(constants.ZERO_ADDRESS, this.value, { from: sender }),
-      'Tickets: transfer to the zero address',
-    );
-  });
-
-  it('emits a Transfer event on successful transfers', async function () {
-    const receipt = await this.tickets.transfer(
-      receiver, this.value, { from: sender }
-    );
-
-    // Event assertions can verify that the arguments are the expected ones
-    expectEvent(receipt, 'Transfer', {
-      from: sender,
-      to: receiver,
-      value: this.value,
-    });
-  });
-
   it('updates balances on successful transfers', async function () {
     this.tickets.transfer(receiver, this.value, { from: sender });
 

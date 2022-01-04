@@ -20,9 +20,11 @@ contract Tickets is ERC721, ERC721Enumerable, Pausable, Ownable, ERC721Burnable 
 
     uint256 public MAX_TICKETS;
 
-    uint public constant maxTicketPurchase = 20;
+    uint256 soldTickets;
 
-    uint256 public constant ticketPrice = 10000000000000000; //0.08 ETH
+    uint public constant maxTicketPurchase = 4;
+
+    uint256 public constant ticketPrice = 10000000000000000; //0.01 ETH
 
     /* EVENTS */
 
@@ -47,15 +49,22 @@ contract Tickets is ERC721, ERC721Enumerable, Pausable, Ownable, ERC721Burnable 
     }
 
     function totalSupply() public view override returns (uint256) {
-      return MAX_TICKETS;
+      return soldTickets;
+    }
+
+    function safeMint(address to) public onlyOwner {
+        uint256 tokenId = _tokenIdCounter.current();
+        _tokenIdCounter.increment();
+        _safeMint(to, tokenId);
     }
 
     /**
      * Set some tickets aside
      */
     function reserveTickets(uint256 reserves) public onlyOwner {   
-        // require reserves !< supply     
+        require(reserves < 20, "reserveTickets: Tried to reserve more the 20 tickets");
         uint supply = totalSupply();
+        require(reserves + supply <= MAX_TICKETS, "reserveTickets: reserve plus supply is bigger than max ticket amount");
         uint i;
         for (i = 0; i < reserves; i++) {
             _safeMint(msg.sender, supply + i);
@@ -71,10 +80,10 @@ contract Tickets is ERC721, ERC721Enumerable, Pausable, Ownable, ERC721Burnable 
     * Mints Tickets
     */
     function buyTickets(uint numberOfTokens) public payable {
-        require(paused(), "Sale must be active to mint ticket");
-        require(numberOfTokens <= maxTicketPurchase, "Can only mint 20 tokens at a time");
-        require(totalSupply().add(numberOfTokens) <= MAX_TICKETS, "Purchase would exceed max supply of tickets");
-        require(ticketPrice.mul(numberOfTokens) <= msg.value, "Ether value sent is not correct");
+        require(!paused(), "buyTickets: Sale must be active to buy ticket");
+        require(numberOfTokens <= maxTicketPurchase, "buyTickets: Can only buy 4 tokens at a time");
+        require(totalSupply().add(numberOfTokens) <= MAX_TICKETS, "buyTickets: Purchase would exceed max supply of tickets");
+        require(ticketPrice.mul(numberOfTokens) <= msg.value, "buyTickets: Ether value sent is not correct");
         
         for(uint i = 0; i < numberOfTokens; i++) {
             uint mintIndex = totalSupply();

@@ -1,5 +1,5 @@
-var InvestmentPool = artifacts.require("./InvestmentPool.sol");
+var Tickets = artifacts.require("./Tickets.sol");
 
 module.exports = function(deployer) {
-  deployer.deploy(InvestmentPool);
+  deployer.deploy(Tickets, 10000);
 };
