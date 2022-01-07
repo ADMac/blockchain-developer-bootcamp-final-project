@@ -1,29 +1,51 @@
 {
-  "name": "blockchain-developer-bootcamp-final-project",
-  "version": "1.0.0",
-  "description": "### Description This is a savings application where a small group of people periodically contribute money into a collective pot.  A person is then randomly selected to recieve the money.  In the subsequent contribution period, a new person is randomly selected to recieve the money collected during that period.  This continues until all participants have recieved a payout.",
-  "main": "index.js",
-  "directories": {
-    "test": "test"
+  "name": "react-final",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.4.1",
+    "@testing-library/jest-dom": "^5.16.1",
+    "@testing-library/react": "^12.1.2",
+    "@testing-library/user-event": "^13.5.0",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-scripts": "5.0.0",
+    "stream": "^0.0.2",
+    "web-vitals": "^2.1.2",
+    "webpack": "^5.65.0"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/ADMac/blockchain-developer-bootcamp-final-project.git"
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "description": "This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).",
+  "main": "index.js",
+  "devDependencies": {
+    "@nomiclabs/hardhat-web3": "^2.0.0",
+    "@openzeppelin/test-helpers": "^0.5.15",
+    "web3": "^1.6.1"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/ADMac/blockchain-developer-bootcamp-final-project/issues"
-  },
-  "homepage": "https://github.com/ADMac/blockchain-developer-bootcamp-final-project#readme",
-  "devDependencies": {
-    "@openzeppelin/contracts": "^4.3.3",
-    "@openzeppelin/test-helpers": "^0.5.15",
-    "chai": "^4.3.4",
-    "chai-bignumber": "^3.0.0"
-  }
+  "license": "ISC"
 }
