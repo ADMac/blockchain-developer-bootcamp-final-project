@@ -27,8 +27,10 @@ contract('Tickets', function ([sender, receiver]) {
     const stuff = await this.tickets.buyTickets(4, { from: receiver, value: web3.utils.toWei('1', 'ether') });
 
     // assert owner has 4 tickets
-    expect(await this.tickets.balanceOf(receiver))
-      .to.be.bignumber.equal(4);
+    const ticketCount = await this.tickets.balanceOf(receiver);
+    assert.equal(ticketCount.toString(), new BN(4).toString());
+    // expect(await this.tickets.balanceOf(receiver))
+      // .to.be.equal(new BN(4));
   });
 
   // mint max amount of tickets

@@ -88,6 +88,7 @@ contract Tickets is ERC721, ERC721Enumerable, Pausable, Ownable, ERC721Burnable 
         for(uint i = 0; i < numberOfTokens; i++) {
             uint mintIndex = totalSupply();
             if (totalSupply() < MAX_TICKETS) {
+                soldTickets += 1; 
                 _safeMint(msg.sender, mintIndex);
             }
         }
