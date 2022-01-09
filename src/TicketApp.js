@@ -43,7 +43,8 @@ const TicketApp = () => {
 	const getAccountBalance = (account) => {
 		window.ethereum.request({method: 'eth_getBalance', params: [account, 'latest']})
 		.then(balance => {
-			setUserBalance(Web3.utils.fromWei(balance, 'ether'));
+			const web3 = new Web3();
+			setUserBalance(web3.utils.fromWei(balance, 'ether'));
 		})
 		.catch(error => {
 			setErrorMessage(error.message);
