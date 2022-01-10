@@ -8,6 +8,7 @@ const TicketApp = () => {
 	const [defaultAccount, setDefaultAccount] = useState(null);
 	const [userBalance, setUserBalance] = useState(null);
 	const [connButtonText, setConnButtonText] = useState('Connect Wallet');
+	const providerUrl = 'http://localhost:8545';
 
 	const connectWalletHandler = () => {
 		if (window.ethereum && window.ethereum.isMetaMask) {
@@ -43,7 +44,7 @@ const TicketApp = () => {
 	const getAccountBalance = (account) => {
 		window.ethereum.request({method: 'eth_getBalance', params: [account, 'latest']})
 		.then(balance => {
-			const web3 = new Web3();
+			const web3 = new Web3(providerUrl);
 			setUserBalance(web3.utils.fromWei(balance, 'ether'));
 		})
 		.catch(error => {
