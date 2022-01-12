@@ -17,7 +17,7 @@ module.exports = {
     rinkeby: {
       provider: () => new HDWalletProvider({
         mnemonic: process.env.MNEMONIC, 
-        providerOrUrl: `https://rinkeby.infura.io/${process.env.INFURA_API_KEY}`,
+        providerOrUrl: `https://rinkeby.infura.io/v3/1dcda525e1f447c080bf02091a54fa64`,
         numberOfAddresses: 1,
         shareNonce: true
       }),

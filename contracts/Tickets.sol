@@ -9,6 +9,12 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
+/// @title A simulator for trees
+/// @author Allister McKenzie
+/// @notice You can use this contract for only the most basic simulation
+/// @dev All function calls are currently implemented without side effects
+/// @custom:experimental This is an experimental contract.
+
 contract Tickets is ERC721, ERC721Enumerable, Pausable, Ownable, ERC721Burnable {
     using Counters for Counters.Counter;
 
@@ -28,9 +34,11 @@ contract Tickets is ERC721, ERC721Enumerable, Pausable, Ownable, ERC721Burnable 
 
     /* EVENTS */
 
-    event ticketBought();
+    event ticketBought(uint count);
 
-    event ticketTransfered();
+    event ticketTransfered(uint ticketId);
+
+    event fundsWithdrawn(uint amount);
 
     /* CONSTRUCTOR */
 
@@ -51,16 +59,19 @@ contract Tickets is ERC721, ERC721Enumerable, Pausable, Ownable, ERC721Burnable 
     function totalSupply() public view override returns (uint256) {
       return soldTickets;
     }
-
+// make private???
     function safeMint(address to) public onlyOwner {
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
         _safeMint(to, tokenId);
     }
 
-    /**
-     * Set some tickets aside
-     */
+    /// @notice Owner can reserve no more that 20 tickets for themselves
+    /// @dev The Alexandr N. Tetearing algorithm could increase precision
+    /// @param reserves The number of tickets the user want to reserve
+    /// @note should add limit to the total amount of the supply that can be reserved by the owner
+    /// @note would prefer to batch mint instead of minting in loop
+
     function reserveTickets(uint256 reserves) public onlyOwner {   
         require(reserves < 20, "reserveTickets: Tried to reserve more the 20 tickets");
         uint supply = totalSupply();
@@ -74,24 +85,29 @@ contract Tickets is ERC721, ERC721Enumerable, Pausable, Ownable, ERC721Burnable 
     function withdraw() public onlyOwner {
         uint balance = address(this).balance;
         payable(msg.sender).transfer(balance);
+        assert(balance == 0);
+        emit fundsWithdrawn(balance);
     }
 
-    /**
-    * Mints Tickets
-    */
-    function buyTickets(uint numberOfTokens) public payable {
+    /// @notice User purchases a specific number of tokens
+    /// @param numberOfTickets The amount of tickets the user wants to purchase
+    /// @note would prefer to batch mint instead of minting in loop
+
+    function buyTickets(uint numberOfTickets) public payable {
         require(!paused(), "buyTickets: Sale must be active to buy ticket");
-        require(numberOfTokens <= maxTicketPurchase, "buyTickets: Can only buy 4 tokens at a time");
-        require(totalSupply().add(numberOfTokens) <= MAX_TICKETS, "buyTickets: Purchase would exceed max supply of tickets");
-        require(ticketPrice.mul(numberOfTokens) <= msg.value, "buyTickets: Ether value sent is not correct");
+        require(numberOfTickets <= maxTicketPurchase, "buyTickets: Can only buy 4 tokens at a time");
+        require(totalSupply().add(numberOfTickets) <= MAX_TICKETS, "buyTickets: Purchase would exceed max supply of tickets");
+        require(ticketPrice.mul(numberOfTickets) <= msg.value, "buyTickets: Ether value sent is not correct");
         
-        for(uint i = 0; i < numberOfTokens; i++) {
+        for(uint i = 0; i < numberOfTickets; i++) {
             uint mintIndex = totalSupply();
             if (totalSupply() < MAX_TICKETS) {
                 soldTickets += 1; 
                 _safeMint(msg.sender, mintIndex);
             }
         }
+
+        emit ticketBought(numberOfTickets);
     }
 
     function _beforeTokenTransfer(address from, address to, uint256 tokenId)

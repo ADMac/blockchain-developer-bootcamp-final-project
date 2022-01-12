@@ -2,9 +2,8 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 import Web3 from 'web3';
 import contract from './Tickets.json';
-// import { getOwnBalance } from './Web3Client';
 
-const contractAddress = "0x6624A347f23CC673e31E72f3e3e9E2C423Ca43a9";
+const contractAddress = "0x8bc7beA247441974d52FA3A625816363ddbF2277";
 const abi = contract.abi;
 
 function App() {
@@ -79,17 +78,11 @@ function App() {
         const signer = web3.eth.accounts.create();
         const ticketContract = new web3.eth.Contract(abi, contractAddress);
 
-        console.groupCollapsed('Contract info');
-        console.log(ticketContract);
-        console.log(contract);
-        console.log(contract.abi);
-        console.groupEnd();
-
         console.log("Initialize payment");
-        let ticketTxn = await ticketContract.buyTickets(3, { from: signer, value: web3.utils.toWei('1', 'ether') });
+        let ticketTxn = await ticketContract.methods.buyTickets(3);
 
         console.log("Minting...please wait");
-        await ticketTxn.wait();
+        //await ticketTxn.wait();
 
         console.log(`Mined, see transaction: https://rinkeby.etherscan.io/tx/${ticketTxn.hash}`);
       } else {
