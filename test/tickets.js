@@ -29,8 +29,6 @@ contract('Tickets', function ([sender, receiver]) {
     // assert owner has 4 tickets
     const ticketCount = await this.tickets.balanceOf(receiver);
     assert.equal(ticketCount.toString(), new BN(4).toString());
-    // expect(await this.tickets.balanceOf(receiver))
-      // .to.be.equal(new BN(4));
   });
 
   // mint max amount of tickets
@@ -97,14 +95,4 @@ contract('Tickets', function ([sender, receiver]) {
     // assert passing
     const stuff1 = await this.tickets.buyTickets(3, { from: receiver, value: web3.utils.toWei('1', 'ether') });
   });
-
-  // mint tickets while paused
-/*
-  it('updates balances on successful transfers', async function () {
-    this.tickets.transfer(receiver, this.value, { from: sender });
-
-    // BN assertions are automatically available via chai-bn (if using Chai)
-    expect(await this.tickets.balanceOf(receiver))
-      .to.be.bignumber.equal(this.value);
-  });*/
 });

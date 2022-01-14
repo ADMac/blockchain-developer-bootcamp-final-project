@@ -36,8 +36,6 @@ contract Tickets is ERC721, ERC721Enumerable, Pausable, Ownable, ERC721Burnable 
 
     event ticketBought(uint count);
 
-    event ticketTransfered(uint ticketId);
-
     event fundsWithdrawn(uint amount);
 
     /* CONSTRUCTOR */
@@ -59,7 +57,7 @@ contract Tickets is ERC721, ERC721Enumerable, Pausable, Ownable, ERC721Burnable 
     function totalSupply() public view override returns (uint256) {
       return soldTickets;
     }
-// make private???
+
     function safeMint(address to) public onlyOwner {
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
